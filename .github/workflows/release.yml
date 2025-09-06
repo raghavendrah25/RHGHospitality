@@ -38,6 +38,6 @@ jobs:
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ steps.vars.outputs.version }}
-          name: Release ${{ steps.vars.outputs.version }}
-          files: bin/server
+          generate_release_notes: true
+          files: |
+            bin/server
