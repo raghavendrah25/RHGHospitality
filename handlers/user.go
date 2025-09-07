@@ -4,25 +4,30 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/raghavendrah25/RHGHospitality/types"
+	"github.com/raghavendrah25/RHGHospitality/db"
 )
 
-func HandleGetUser(c *gin.Context) {
-	data := []types.User{
-		{ID: "1", FirstName: "John", LastName: "Doe"},
-		{ID: "2", FirstName: "Jane", LastName: "Smith"},
-	}
-	
-	c.JSON(http.StatusOK, data)
+type UserHandler struct {
+	userStore db.UserStore
 }
 
-func HandleGetUserByID(c *gin.Context) {
+func NewUserHandler(userStore db.UserStore) *UserHandler {
+	return &UserHandler{
+		userStore: userStore,
+	}
+}
+
+func (h *UserHandler) GetUserByID(c *gin.Context) {
 	userID := c.Params.ByName("id")
-	data := types.User{
-		ID:        userID,
-		FirstName: "John",
-		LastName:  "Doe",
+	user, err := h.userStore.GetUserByID(c, userID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve user"})
+		return
+	}
+	if user == nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
+		return
 	}
 
-	c.JSON(http.StatusOK, data)
+	c.JSON(http.StatusOK, user)
 }
